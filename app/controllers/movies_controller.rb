@@ -6,31 +6,29 @@ class MoviesController < ApplicationController
     # will render app/views/movies/show.<extension> by default
   end
 
-  #def index
-   # if params.has_key?(:sort)
-    #  @sort = params[:sort].to_s
-     # @movies = Movie.order(params[:sort].to_s).all
-  #  else
-  # @movies = Movie.all
-  # end
-  # @all_ratings= Movie.all_ratings
-  #end
-  
   def index
-    if(params[:ratings] == nil)
-              params[:ratings] = Hash[Movie.all_ratings.map {|rating| [rating,"1"]} ]
-            end
-      @checkboxes=params[:ratings]
-      
-      if params.has_key?(:sort)
-   @sort = params[:sort].to_s
-   @movies = Movie.order(params[:sort].to_s).find(:all, :conditions => { :rating => params[:ratings].keys})
-   else
-     @movies = Movie.find(:all, :conditions => { :rating => params[:ratings].keys})
-     end
-     @all_ratings = Movie.all_ratings
-     end
+    if session[:ratings]==nil
+	      params[:ratings]=Hash[Movie.all_ratings.map {|rating| [rating,"1"] }]
+	      session[:ratings] = params[:ratings]
+    end
+    
+    if params[:ratings]==nil
+	#flash.keep
+	  redirect_to movies_path
+        
+    end
 
+    @checkboxes=params[:ratings]
+
+    if params.has_key?(:sort)
+	@sort=params[:sort].to_s
+	@movies = Movie.order(params[:sort].to_s).find(:all, :conditions => { :rating => params[:ratings].keys}) 
+	session[:sort]=params[:sort]     	
+    else
+       @movies = Movie.find(:all, :conditions => { :rating => params[:ratings].keys})
+    end
+    @all_ratings = Movie.all_ratings
+  end
 
   def new
     # default: render 'new' template
